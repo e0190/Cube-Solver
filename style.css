@@ -49,6 +49,7 @@ p { color: #888; margin-bottom: 25px; text-align: center; max-width: 500px; font
 .c-R { background-color: #b71234; } /* Red */
 .c-B { background-color: #009b48; } /* Green */
 .c-D { background-color: #ffd500; } /* Yellow */
+.c-X { background-color: #252528; } /* Blank unpainted slate state */
 
 /* Face Window & CSS Sliding Animation Canvas */
 .face-window {
@@ -89,6 +90,13 @@ p { color: #888; margin-bottom: 25px; text-align: center; max-width: 500px; font
     transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
+/* Hidden state rules */
+.grid-3x3.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+
 /* Slide Transition Classes triggered by JS */
 .grid-3x3.slide-out {
     transform: translateX(-100%) rotateY(-30deg);
@@ -106,7 +114,7 @@ p { color: #888; margin-bottom: 25px; text-align: center; max-width: 500px; font
     transition: background-color 0.15s;
 }
 
-/* Locked indicators for center squares */
+/* Locked indicators for core center anchor labels */
 .sticker.center-lock {
     cursor: not-allowed;
     position: relative;
@@ -120,7 +128,7 @@ p { color: #888; margin-bottom: 25px; text-align: center; max-width: 500px; font
     transform: translate(-50%, -50%);
     width: 8px;
     height: 8px;
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
 }
 
