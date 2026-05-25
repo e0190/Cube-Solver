@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubik's Cube Solver - Grubiks Replica</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="header-banner">
+        RUBIK'S CUBE SOLVER 3X3X3 - REPLICA
+    </div>
+
+    <div class="palette-container">
+        <div class="color-block c-R selected" data-color="R"></div>
+        <div class="color-block c-F" data-color="F"></div>
+        <div class="color-block c-D" data-color="D"></div>
+        <div class="color-block c-B" data-color="B"></div>
+        <div class="color-block c-U" data-color="U"></div>
+        <div class="color-block c-L" data-color="L"></div>
+    </div>
+
+    <div class="workspace">
+        <div class="cube-viewport">
+            <svg id="isometricCube" viewBox="-180 -180 360 360" width="100%" height="100%">
+                <g id="top-face"></g>
+                <g id="left-face"></g>
+                <g id="right-face"></g>
+            </svg>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <button id="resetBtn" class="blue-btn">Reset</button>
+        
+        <div class="nav-arrows">
+            <button id="rotLeftBtn" class="blue-btn">←</button>
+            <button id="rotUpBtn" class="blue-btn">↑</button>
+            <button id="rotRightBtn" class="blue-btn">→</button>
+        </div>
+
+        <button id="solveBtn" class="blue-btn">Solve!</button>
+    </div>
+
+    <div class="player-panel" id="playerPanel">
+        <div class="status-text" id="stepStatus">Step 0 of 0</div>
+        <div class="move-display" id="currentMove">-</div>
+        <div class="player-buttons">
+            <button id="prevMoveBtn" class="blue-btn">Back</button>
+            <button id="nextMoveBtn" class="blue-btn">Next Move →</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
