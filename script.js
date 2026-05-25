@@ -106,57 +106,65 @@ document.querySelector('.palette-container').addEventListener('click', (e) => {
     }
 });
 
-// --- Serverless Communication Handler Endpoint Link ---
-document.getElementById('solveBtn').addEventListener('click', async () => {
-    let userCenterMap = {};
-    FACES.forEach(f => userCenterMap[f] = cubeState[f][4]);
+// Initialize client-side brain logic tool
+Cube.initSolver();
 
-    let incomplete = false;
-    FACES.forEach(f => { if (cubeState[f].includes('X')) incomplete = true; });
+document.getElementById('solveBtn').addEventListener('click', () => {
+    // 1. Audit check to make sure the user filled in all 54 stickers across all orientations
+    let unpaintedTilesFound = false;
+    FACES.forEach(f => { 
+        if (cubeState[f].includes('X')) unpaintedTilesFound = true; 
+    });
 
-    if (incomplete) {
-        alert("Error: Rotate your view angles and fill out all 54 fields completely.");
+    if (unpaintedTilesFound) {
+        alert("Error: Look over all sides using the arrow buttons and paint all 54 tiles completely before clicking Solve!");
         return;
     }
 
-    let reverseLookup = {};
-    for (let targetFace in userCenterMap) {
-        reverseLookup[userCenterMap[targetFace]] = targetFace.toLowerCase();
+    // 2. Identify center tile assignments to establish system orientation map definitions
+    let centerMappingTable = {};
+    FACES.forEach(f => {
+        centerMappingTable[f] = cubeState[f][4];
+    });
+
+    // 3. Prevent duplicate center mapping errors
+    let assignedCenterColors = Object.values(centerMappingTable);
+    let uniqueCentersCheck = new Set(assignedCenterColors);
+    if (uniqueCentersCheck.size !== 6) {
+        alert("Error: Every single face must have a unique center color block! Make sure you didn't paint the same color in the center of two different sides.");
+        return;
     }
 
+    // 4. Construct reverse mapping configuration pairs
+    let reverseLookup = {};
+    for (let systemFace in centerMappingTable) {
+        reverseLookup[centerMappingTable[systemFace]] = systemFace;
+    }
+
+    // 5. Build Kociemba standard definition string matrix paths
     let compiledFormulaString = '';
     FACES.forEach(f => {
         for (let i = 0; i < 9; i++) {
-            compiledFormulaString += reverseLookup[cubeState[f][i]] || 'u';
+            let selectedColorToken = cubeState[f][i];
+            compiledFormulaString += reverseLookup[selectedColorToken] || 'U';
         }
     });
 
     try {
-        // Point fetch directly to your serverless endpoint file location path
-        const response = await fetch('/api/solve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cube: compiledFormulaString })
-        });
+        const solverInstance = Cube.fromString(compiledFormulaString);
+        const rawMoves = solverInstance.solve();
 
-        const result = await response.json();
-
-        if (result.error) {
-            alert(result.error);
+        if (!rawMoves) {
+            alert("The cube is already completely solved!");
             return;
         }
 
-        solutionMoves = result.moves;
-        if (solutionMoves.length === 0) {
-            alert("The grid parameters are already fully solved!");
-            return;
-        }
-
+        solutionMoves = rawMoves.split(' ');
         currentMoveIndex = 0;
         document.getElementById('playerPanel').style.display = 'block';
         updatePlaybackDisplay();
     } catch (err) {
-        alert("Serverless infrastructure computation runtime routing failure.");
+        alert("Error: Invalid physical cube scramble configuration! This layout has impossible corner or edge pairings (e.g. a corner with two identical colors, or pieces flipped in a way a real cube cannot do). Check your colors and try again.");
     }
 });
 
