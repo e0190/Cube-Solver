@@ -1,4 +1,4 @@
-// Mathematical face orientation arrays
+// Mathematical face orientation identifiers
 const FACES = ['U', 'R', 'F', 'D', 'L', 'B'];
 
 // Map structural orientation pointers tracking what face is currently viewed top/left/right
@@ -20,18 +20,18 @@ FACES.forEach(f => {
 
 // Coordinate matrices building our isometric 2D perspective views
 function getIsometricPoints(face, row, col) {
-    const size = 32;
-    const gap = 1.1; // Grid layout separation index offset
+    const size = 35;
+    const gap = 2; // Spacing between stickers
     
-    // Shift index calculation weights to space elements outward cleanly
-    let u = (col - 1) * size * gap;
-    let v = (row - 1) * size * gap;
+    // Calculate local positions relative to face origin grid centers
+    let u = (col - 1) * (size + gap);
+    let v = (row - 1) * (size + gap);
 
     let pts = [];
     if (face === 'top') {
-        // Top Face skew lines mapping logic
+        // Flat diamond isometric projection for top panel matrix orientation
         let cx = (u - v) * Math.cos(Math.PI / 6);
-        let cy = -size - 16 + (u + v) * Math.sin(Math.PI / 6);
+        let cy = -60 + (u + v) * Math.sin(Math.PI / 6);
         pts = [
             [cx, cy],
             [cx + size * Math.cos(Math.PI / 6), cy + size * Math.sin(Math.PI / 6)],
@@ -39,9 +39,10 @@ function getIsometricPoints(face, row, col) {
             [cx - size * Math.cos(Math.PI / 6), cy + size * Math.sin(Math.PI / 6)]
         ];
     } else if (face === 'left') {
-        // Left Face skewed polygon map vectors
-        let cx = -size * Math.cos(Math.PI / 6) + (u - v) * Math.cos(Math.PI / 6);
-        let cy = (u + v) * Math.sin(Math.PI / 6) + v * size * 0.15; 
+        // Skewed grid matrix coordinate mapping for the left side view panel
+        let cx = -55 + (u * Math.cos(Math.PI / 6));
+        let cy = 30 + (u * Math.sin(Math.PI / 6)) + (v * size);
+        // Build flat polygon corners vectors
         pts = [
             [cx, cy],
             [cx + size * Math.cos(Math.PI / 6), cy + size * Math.sin(Math.PI / 6)],
@@ -49,9 +50,9 @@ function getIsometricPoints(face, row, col) {
             [cx, cy + size]
         ];
     } else if (face === 'right') {
-        // Right Face skewed polygon vectors
-        let cx = (u - v) * Math.cos(Math.PI / 6);
-        let cy = size * Math.sin(Math.PI / 6) + (u + v) * Math.sin(Math.PI / 6) + u * size * 0.15;
+        // Skewed grid matrix coordinate mapping for the right side view panel
+        let cx = 55 - (v * Math.cos(Math.PI / 6));
+        let cy = 30 + (v * Math.sin(Math.PI / 6)) + (u * size);
         pts = [
             [cx, cy],
             [cx + size * Math.cos(Math.PI / 6), cy - size * Math.sin(Math.PI / 6)],
@@ -60,11 +61,6 @@ function getIsometricPoints(face, row, col) {
         ];
     }
     return pts.map(p => p.join(',')).join(' ');
-}
-
-// Map logical square indexes inside our grid structure to flat UI rendering coordinates
-function getCubeStateIndex(faceName, row, col) {
-    return row * 3 + col;
 }
 
 // Build the isometric SVG layers dynamically on screen
@@ -77,12 +73,13 @@ function renderIsometricCubeView() {
 
     views.forEach(view => {
         const container = document.getElementById(view.id);
+        if (!container) return;
         container.innerHTML = '';
 
         for (let r = 0; r < 3; r++) {
             for (let c = 0; c < 3; c++) {
                 const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                const stateIdx = getCubeStateIndex(view.logicalFace, r, c);
+                const stateIdx = r * 3 + c;
                 const currentColor = cubeState[view.logicalFace][stateIdx];
 
                 poly.setAttribute('points', getIsometricPoints(view.type, r, c));
@@ -101,57 +98,43 @@ function renderIsometricCubeView() {
 }
 
 // --- Navigation Spin Engine Map Loops ---
-// Map orientation adjustments when clicking arrows to spin views safely
 document.getElementById('rotLeftBtn').addEventListener('click', () => {
-    // Spin left layout shifts
     const oldLeft = currentOrientation.left;
     currentOrientation.left = currentOrientation.right;
     
-    // Deduce opposing face logic paths mapping standard positions layout configurations
     if (oldLeft === 'F') currentOrientation.right = 'B';
     else if (oldLeft === 'R') currentOrientation.right = 'L';
     else if (oldLeft === 'B') currentOrientation.right = 'F';
     else if (oldLeft === 'L') currentOrientation.right = 'R';
 
     renderIsometricCubeView();
-    triggerSpinEffect('left-face');
 });
 
 document.getElementById('rotRightBtn').addEventListener('click', () => {
-    // Spin right layout shifts
     const oldRight = currentOrientation.right;
     currentOrientation.right = currentOrientation.left;
 
     if (oldRight === 'R') currentOrientation.left = 'B';
     else if (oldRight === 'B') currentOrientation.left = 'L';
-    else if (oldRight === '?.') currentOrientation.left = 'F'; // Default safety fallback
+    else if (oldRight === 'L') currentOrientation.left = 'F';
     else if (oldRight === 'F') currentOrientation.left = 'R';
-    else currentOrientation.left = 'F';
 
     renderIsometricCubeView();
-    triggerSpinEffect('right-face');
 });
 
 document.getElementById('rotUpBtn').addEventListener('click', () => {
-    // Flip cube upward to view the down face structural profiles
     const oldTop = currentOrientation.top;
     currentOrientation.top = currentOrientation.left;
     currentOrientation.left = (oldTop === 'U') ? 'D' : 'U';
     
     renderIsometricCubeView();
-    triggerSpinEffect('top-face');
 });
-
-function triggerSpinEffect(groupId) {
-    const target = document.getElementById(groupId);
-    target.style.transform = 'scale(0.95)';
-    setTimeout(() => { target.style.transform = 'none'; }, 150);
-}
 
 // Palette bar handling
 document.querySelector('.palette-container').addEventListener('click', (e) => {
     if (e.target.classList.contains('color-block')) {
-        document.querySelector('.color-block.selected').classList.remove('selected');
+        const selectedEl = document.querySelector('.color-block.selected');
+        if (selectedEl) selectedEl.classList.remove('selected');
         e.target.classList.add('selected');
         activeColor = e.target.dataset.color;
     }
@@ -161,7 +144,6 @@ document.querySelector('.palette-container').addEventListener('click', (e) => {
 Cube.initSolver();
 
 document.getElementById('solveBtn').addEventListener('click', () => {
-    // Deduce which colors match which face by sampling centers dynamically
     let userCenterMap = {};
     FACES.forEach(f => {
         userCenterMap[f] = cubeState[f][4];
@@ -173,14 +155,14 @@ document.getElementById('solveBtn').addEventListener('click', () => {
     });
 
     if (incomplete) {
-        alert("Error: Please look over every side by spinning your view and paint all 54 squares!");
+        alert("Error: Please rotate through every view and paint all 54 squares first!");
         return;
     }
 
     let centerColors = Object.values(userCenterMap);
     let uniqueCenters = new Set(centerColors);
     if (uniqueCenters.size !== 6 || centerColors.includes('X')) {
-        alert("Error: Each side center piece must contain a totally unique color to serve as an orientation anchor mapping vector!");
+        alert("Error: Each side center piece must contain a totally unique color to determine tracking boundaries!");
         return;
     }
 
