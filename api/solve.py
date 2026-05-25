@@ -1,47 +1,59 @@
-from http.server import BaseHTTPRequestHandler
 import json
-import rubik_solver.utils as utils
 
-# Vercel relies on this explicit class named 'handler' to execute serverless logic
-class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        content_length = int(self.headers.get('Content-Length', 0))
-        post_data = self.rfile.read(content_length)
+def handler(event, context):
+    try:
+        method = event.get('httpMethod', 'POST')
         
-        # Set up response baseline configurations
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        # Handle cross-origin handshakes to avoid browser blockages
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        self.end_headers()
+        if method == 'OPTIONS':
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+                },
+                'body': ''
+            }
 
-        try:
-            payload = json.loads(post_data.decode('utf-8'))
-            cube_string = payload.get('cube', '')
+        body_content = event.get('body', '')
+        if not body_content:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Empty body received'})
+            }
 
-            if len(cube_string) != 54:
-                response = {'error': 'Incomplete data maps received. Must be exactly 54 characters.'}
-                self.wfile.write(json.dumps(response).encode('utf-8'))
-                return
+        data = json.loads(body_content)
+        cube_string = data.get('cube', '')
 
-            # Execute the calculation inside your chosen python library module
-            solution = utils.solve(cube_string, 'Kociemba')
-            move_list = [str(move) for move in solution]
+        if len(cube_string) != 54:
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json'
+                },
+                'body': json.dumps({'error': f'Incomplete matrix mapping string length: {len(cube_string)}/54'})
+            }
 
-            response = {'moves': move_list}
-            self.wfile.write(json.dumps(response).encode('utf-8'))
+        import rubik_solver.utils as utils
+        solution = utils.solve(cube_string, 'Kociemba')
+        move_list = [str(move) for move in solution]
 
-        except Exception as e:
-            response = {'error': f'Invalid layout arrangement profiles or unmatchable corner edge pairs.'}
-            self.wfile.write(json.dumps(response).encode('utf-8'))
-            return
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({'moves': move_list})
+        }
 
-    def do_OPTIONS(self):
-        # Handle preflight check requirements cleanly
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        self.end_headers()
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({'error': 'Invalid layout arrangement profile or illegal core alignments.'})
+        }
