@@ -106,65 +106,62 @@ document.querySelector('.palette-container').addEventListener('click', (e) => {
     }
 });
 
-// Initialize client-side brain logic tool
-Cube.initSolver();
-
-document.getElementById('solveBtn').addEventListener('click', () => {
-    // 1. Audit check to make sure the user filled in all 54 stickers across all orientations
+document.getElementById('solveBtn').addEventListener('click', async () => {
     let unpaintedTilesFound = false;
-    FACES.forEach(f => { 
-        if (cubeState[f].includes('X')) unpaintedTilesFound = true; 
-    });
+    FACES.forEach(f => { if (cubeState[f].includes('X')) unpaintedTilesFound = true; });
 
     if (unpaintedTilesFound) {
-        alert("Error: Look over all sides using the arrow buttons and paint all 54 tiles completely before clicking Solve!");
+        alert("Error: Paint all 54 tiles across all side maps completely first!");
         return;
     }
 
-    // 2. Identify center tile assignments to establish system orientation map definitions
     let centerMappingTable = {};
-    FACES.forEach(f => {
-        centerMappingTable[f] = cubeState[f][4];
-    });
+    FACES.forEach(f => centerMappingTable[f] = cubeState[f][4]);
 
-    // 3. Prevent duplicate center mapping errors
     let assignedCenterColors = Object.values(centerMappingTable);
     let uniqueCentersCheck = new Set(assignedCenterColors);
     if (uniqueCentersCheck.size !== 6) {
-        alert("Error: Every single face must have a unique center color block! Make sure you didn't paint the same color in the center of two different sides.");
+        alert("Error: Every side must map to a unique color center anchor piece!");
         return;
     }
 
-    // 4. Construct reverse mapping configuration pairs
     let reverseLookup = {};
     for (let systemFace in centerMappingTable) {
-        reverseLookup[centerMappingTable[systemFace]] = systemFace;
+        reverseLookup[centerMappingTable[systemFace]] = systemFace.toLowerCase();
     }
 
-    // 5. Build Kociemba standard definition string matrix paths
     let compiledFormulaString = '';
     FACES.forEach(f => {
         for (let i = 0; i < 9; i++) {
-            let selectedColorToken = cubeState[f][i];
-            compiledFormulaString += reverseLookup[selectedColorToken] || 'U';
+            compiledFormulaString += reverseLookup[cubeState[f][i]] || 'u';
         }
     });
 
     try {
-        const solverInstance = Cube.fromString(compiledFormulaString);
-        const rawMoves = solverInstance.solve();
+        const response = await fetch('/api/solve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cube: compiledFormulaString })
+        });
 
-        if (!rawMoves) {
-            alert("The cube is already completely solved!");
+        const result = await response.json();
+
+        if (result.error) {
+            alert(result.error);
             return;
         }
 
-        solutionMoves = rawMoves.split(' ');
+        solutionMoves = result.moves;
+        if (solutionMoves.length === 0) {
+            alert("The puzzle is already solved!");
+            return;
+        }
+
         currentMoveIndex = 0;
         document.getElementById('playerPanel').style.display = 'block';
         updatePlaybackDisplay();
     } catch (err) {
-        alert("Error: Invalid physical cube scramble configuration! This layout has impossible corner or edge pairings (e.g. a corner with two identical colors, or pieces flipped in a way a real cube cannot do). Check your colors and try again.");
+        alert("Serverless routing configuration breakdown.");
     }
 });
 
