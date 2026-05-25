@@ -10,7 +10,7 @@
 <body>
 
     <h1>Rubik's Cube Solver</h1>
-    <p>Select a color and paint the active face. Use <strong>Next Face</strong> to rotate through the sides with a sliding animation.</p>
+    <p>Select a color from the palette, then click <strong>Next Face</strong> to reveal and cycle through your cube sides.</p>
 
     <div class="palette" id="palette">
         <div class="palette-color c-U selected" data-color="U" title="White (Up)"></div>
@@ -22,9 +22,9 @@
     </div>
 
     <div class="face-window">
-        <div class="face-title" id="faceTitle">Front Face (F)</div>
+        <div class="face-title" id="faceTitle">Click "Next Face" to Begin</div>
         <div class="face-container" id="faceContainer">
-            <div class="grid-3x3" id="cubeGrid">
+            <div class="grid-3x3 hidden" id="cubeGrid">
                 </div>
         </div>
     </div>
