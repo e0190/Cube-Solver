@@ -1,32 +1,34 @@
-// Map ordering sequence arrays matching standard solver library configurations
 const FACES = ['U', 'R', 'F', 'D', 'L', 'B'];
 const FACE_LABELS = {
-    'U': 'Up Face (White Center)',
-    'R': 'Right Face (Red Center)',
-    'F': 'Front Face (Blue Center)',
-    'D': 'Down Face (Yellow Center)',
-    'L': 'Left Face (Orange Center)',
-    'B': 'Back Face (Green Center)'
+    'U': 'Up Face (White Center Anchor)',
+    'R': 'Right Face (Red Center Anchor)',
+    'F': 'Front Face (Blue Center Anchor)',
+    'D': 'Down Face (Yellow Center Anchor)',
+    'L': 'Left Face (Orange Center Anchor)',
+    'B': 'Back Face (Green Center Anchor)'
 };
 
-let currentFaceIdx = 2; // Start on Front (F) face by default
+let currentFaceIdx = -1; // -1 means start application in hidden, uninitialized mode
 let activeColor = 'U';
 let solutionMoves = [];
 let currentMoveIndex = 0;
 
-// Internal multidimensional data map layout tracking paints
+// Internal data structures tracking face color assignments
+// Starts with 'X' (unpainted dark state), but center blocks (index 4) get anchored right away to anchor layout orientation mapping rules
 let cubeState = {};
-FACES.forEach(f => cubeState[f] = Array(9).fill(f));
+FACES.forEach(f => {
+    cubeState[f] = Array(9).fill('X');
+    cubeState[f][4] = f; // Center anchors stay true to standard cube hardware
+});
 
 const gridEl = document.getElementById('cubeGrid');
 const titleEl = document.getElementById('faceTitle');
 
-// Render the 3x3 square grid matrix
 function renderActiveFace() {
     gridEl.innerHTML = '';
     const activeFaceLetter = FACES[currentFaceIdx];
     
-    // Update structural text title
+    // Update structural text title heading 
     titleEl.textContent = FACE_LABELS[activeFaceLetter];
 
     for (let i = 0; i < 9; i++) {
@@ -47,29 +49,32 @@ function renderActiveFace() {
     }
 }
 
-// Next Face slide handler sequence loops
+// Next Face visual animation sequence processor
 document.getElementById('nextFaceBtn').addEventListener('click', () => {
-    // Add slide-out visual transform animation
+    // Check if app is launching out of its initial hidden boot mode state
+    if (currentFaceIdx === -1) {
+        currentFaceIdx = 2; // Default launch pulls open Front (F) face directly
+        gridEl.classList.remove('hidden');
+        renderActiveFace();
+        return;
+    }
+
+    // Run standard page-turn flip slide transition mechanics
     gridEl.classList.add('slide-out');
 
     setTimeout(() => {
-        // Cycle face target pointer
         currentFaceIdx = (currentFaceIdx + 1) % FACES.length;
         renderActiveFace();
         
-        // Snap element to opposite side seamlessly for incoming slide placement 
         gridEl.classList.remove('slide-out');
         gridEl.classList.add('slide-in');
         
-        // Force layout repaint trigger boundary recalculation
-        gridEl.offsetHeight; 
-        
-        // Remove slide-in constraints allowing standard position resets
+        gridEl.offsetHeight; // Force DOM node rendering recalculation layout engine hack
         gridEl.classList.remove('slide-in');
     }, 250);
 });
 
-// Color Picker tool switch links
+// Color Picker switch bindings
 document.getElementById('palette').addEventListener('click', (e) => {
     if (e.target.classList.contains('palette-color')) {
         document.querySelector('.palette-color.selected').classList.remove('selected');
@@ -78,22 +83,30 @@ document.getElementById('palette').addEventListener('click', (e) => {
     }
 });
 
-// --- Solve Compute Request Engine Pipelines ---
+// --- Solve Request Math Engine Pipeline ---
 Cube.initSolver();
 
 document.getElementById('solveBtn').addEventListener('click', () => {
     let cubeString = '';
-    // Concat layout configuration maps matching sequence structures order parsed by library
+    
+    // Loop mapping verification checks ensuring all values have been filled
+    let incomplete = false;
     ['U', 'R', 'F', 'D', 'L', 'B'].forEach(f => {
         cubeString += cubeState[f].join('');
+        if(cubeState[f].includes('X')) incomplete = true;
     });
+
+    if (incomplete) {
+        alert("Error: Incomplete Grid. You must click through and paint every square before running the solver engine!");
+        return;
+    }
 
     try {
         const solverInstance = Cube.fromString(cubeString);
         const rawMoves = solverInstance.solve();
         
         if (!rawMoves) {
-            alert("The cube is already fully solved!");
+            alert("The cube configuration matches a completed solved state already.");
             return;
         }
 
@@ -102,7 +115,7 @@ document.getElementById('solveBtn').addEventListener('click', () => {
         document.getElementById('playerPanel').style.display = 'block';
         updatePlaybackDisplay();
     } catch (err) {
-        alert("Invalid Layout. Make sure your color counts match a real physical configuration map (e.g., check for cloned corners or edge conflicts) and try again.");
+        alert("Invalid Layout Map Configuration. Verify your physical sticker coordinates don't contain mirrored duplicates or matching edge anomalies.");
     }
 });
 
@@ -133,13 +146,15 @@ document.getElementById('prevMoveBtn').addEventListener('click', () => {
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
-    FACES.forEach(f => cubeState[f] = Array(9).fill(f));
+    FACES.forEach(f => {
+        cubeState[f] = Array(9).fill('X');
+        cubeState[f][4] = f;
+    });
     document.getElementById('playerPanel').style.display = 'none';
     solutionMoves = [];
     currentMoveIndex = 0;
-    currentFaceIdx = 2; // Jump back to Front
-    renderActiveFace();
+    currentFaceIdx = -1; // Reset back to hidden state
+    titleEl.textContent = 'Click "Next Face" to Begin';
+    gridEl.classList.add('hidden');
+    gridEl.innerHTML = '';
 });
-
-// Initial boot initialization script run lifecycle link
-renderActiveFace();
