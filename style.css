@@ -52,14 +52,13 @@ body {
     border: 3px solid #000;
 }
 
-/* Color Palette Layout Configuration Profiles */
 .c-U { background-color: #ffffff; } 
 .c-L { background-color: #ff5800; } 
 .c-F { background-color: #0046ad; } 
 .c-R { background-color: #b71234; } 
 .c-B { background-color: #009b48; } 
 .c-D { background-color: #ffd500; } 
-.c-X { background-color: #ffffff; } /* Unpainted tiles start with a clean white mesh background */
+.c-X { background-color: #ffffff; } 
 
 .workspace {
     width: 100%;
