@@ -3,44 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flat Animated Rubik's Cube Solver</title>
+    <title>Rubik's Cube Solver - Grubiks Style</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/cubejs@0.1.2/lib/cube.min.js"></script>
 </head>
 <body>
 
-    <h1>Rubik's Cube Solver</h1>
-    <p>Paint all 9 squares on each side. The color you choose for the center square tells the solver which face it is. Use <strong>Next Face</strong> to reveal your blank slate canvas.</p>
-
-    <div class="palette" id="palette">
-        <div class="palette-color c-U selected" data-color="U" title="White"></div>
-        <div class="palette-color c-L" data-color="L" title="Orange"></div>
-        <div class="palette-color c-F" data-color="F" title="Blue"></div>
-        <div class="palette-color c-R" data-color="R" title="Red"></div>
-        <div class="palette-color c-B" data-color="B" title="Green"></div>
-        <div class="palette-color c-D" data-color="D" title="Yellow"></div>
+    <div class="header-banner">
+        RUBIK'S CUBE SOLVER 3X3X3 - REPLICA
     </div>
 
-    <div class="face-window">
-        <div class="face-title" id="faceTitle">Click "Next Face" to Begin</div>
-        <div class="face-container" id="faceContainer">
-            <div class="grid-3x3 hidden" id="cubeGrid">
-                </div>
+    <div class="palette-container">
+        <div class="color-block c-R selected" data-color="R"></div>
+        <div class="color-block c-F" data-color="F"></div>
+        <div class="color-block c-D" data-color="D"></div>
+        <div class="color-block c-B" data-color="B"></div>
+        <div class="color-block c-U" data-color="U"></div>
+        <div class="color-block c-L" data-color="L"></div>
+    </div>
+
+    <div class="workspace">
+        <div class="cube-viewport">
+            <svg id="isometricCube" viewBox="-180 -180 360 360" width="100%" height="100%">
+                <g id="top-face"></g>
+                <g id="left-face"></g>
+                <g id="right-face"></g>
+            </svg>
         </div>
     </div>
 
-    <div class="controls">
-        <button id="nextFaceBtn" class="secondary">Next Face ↺</button>
-        <button id="solveBtn">Solve Cube</button>
-        <button id="resetBtn" class="secondary">Reset</button>
+    <div class="action-bar">
+        <button id="resetBtn" class="blue-btn">Reset</button>
+        
+        <div class="nav-arrows">
+            <button id="rotLeftBtn" class="blue-btn">←</button>
+            <button id="rotUpBtn" class="blue-btn">↑</button>
+            <button id="rotRightBtn" class="blue-btn">→</button>
+        </div>
+
+        <button id="solveBtn" class="blue-btn">Solve!</button>
     </div>
 
     <div class="player-panel" id="playerPanel">
         <div class="status-text" id="stepStatus">Step 0 of 0</div>
         <div class="move-display" id="currentMove">-</div>
         <div class="player-buttons">
-            <button id="prevMoveBtn" class="secondary">Back</button>
-            <button id="nextMoveBtn">Next Move →</button>
+            <button id="prevMoveBtn" class="blue-btn">Back</button>
+            <button id="nextMoveBtn" class="blue-btn">Next Move →</button>
         </div>
     </div>
 
