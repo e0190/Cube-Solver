@@ -1,5 +1,5 @@
 :root {
-    --bg-light: #dddddd;
+    --bg-light: #e0e0e0;
     --banner-green: #2db34a;
     --btn-blue: #3b82f6;
     --stroke-black: #000000;
@@ -28,20 +28,20 @@ body {
     box-shadow: inset 0 -3px 5px rgba(0,0,0,0.1);
 }
 
-/* Wide rectangle palette items matching screenshot geometry */
+/* Wide rectangle palette layout matching your reference image */
 .palette-container {
     display: flex;
     justify-content: center;
     gap: 15px;
     width: 100%;
     max-width: 900px;
-    padding: 20px;
+    padding: 25px 20px;
     box-sizing: border-box;
 }
 
 .color-block {
     flex: 1;
-    height: 50px;
+    height: 52px;
     border-radius: 6px;
     cursor: pointer;
     border: 2px solid #555;
@@ -61,20 +61,21 @@ body {
 .c-R { background-color: #b71234; } /* Red */
 .c-B { background-color: #009b48; } /* Green */
 .c-D { background-color: #ffd500; } /* Yellow */
-.c-X { background-color: #e5e5e5; } /* Unpainted light slate state */
+.c-X { background-color: #ffffff; } /* Default unpainted tile starts as white outline */
 
 .workspace {
     width: 100%;
     max-width: 600px;
-    height: 400px;
+    height: 380px;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 20px;
 }
 
 .cube-viewport {
-    width: 320px;
-    height: 320px;
+    width: 340px;
+    height: 340px;
 }
 
 /* SVG Vector Isometric styling rules */
@@ -83,7 +84,7 @@ polygon {
     stroke-width: 4px;
     stroke-linejoin: round;
     cursor: pointer;
-    transition: fill 0.2s, transform 0.4s ease;
+    transition: fill 0.15s;
 }
 
 /* Bottom Actions Control Strip styling */
@@ -95,7 +96,7 @@ polygon {
     max-width: 900px;
     padding: 15px 20px;
     box-sizing: border-box;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 .nav-arrows {
@@ -107,12 +108,12 @@ polygon {
     background-color: var(--btn-blue);
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-size: 0.95rem;
     font-weight: bold;
     border-radius: 4px;
     cursor: pointer;
-    min-width: 70px;
+    min-width: 80px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
