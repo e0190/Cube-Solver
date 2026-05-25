@@ -3,7 +3,7 @@
     --card-bg: #141416;
     --text-color: #ffffff;
     --border-color: #2a2a2e;
-    --accent-color: #0070f3; /* Premium Vercel Blue accent tint */
+    --accent-color: #0070f3;
 }
 
 body {
@@ -15,32 +15,20 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-x: hidden;
 }
 
-h1 { 
-    margin-bottom: 5px; 
-    font-size: 1.8rem; 
-    font-weight: 700; 
-}
+h1 { margin-bottom: 5px; font-size: 1.8rem; font-weight: 700; }
+p { color: #888; margin-bottom: 25px; text-align: center; max-width: 500px; font-size: 0.9rem; }
 
-p { 
-    color: #888; 
-    margin-bottom: 20px; 
-    text-align: center; 
-    max-width: 600px; 
-    font-size: 0.9rem; 
-}
-
+/* Palette Styles */
 .palette {
     display: flex;
     gap: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 25px;
     background: var(--card-bg);
     padding: 10px 20px;
     border-radius: 50px;
     border: 1px solid var(--border-color);
-    z-index: 10;
 }
 
 .palette-color {
@@ -49,15 +37,12 @@ p {
     border-radius: 50%;
     cursor: pointer;
     border: 3px solid transparent;
-    transition: transform 0.1s, border-color 0.1s;
+    transition: transform 0.1s;
 }
 
-.palette-color.selected { 
-    border-color: #fff; 
-    transform: scale(1.1); 
-}
+.palette-color.selected { border-color: #fff; transform: scale(1.1); }
 
-/* Authentic color palette styling rules matching standard official cubes */
+/* Standard Rubik's Cube Colors */
 .c-U { background-color: #ffffff; } /* White */
 .c-L { background-color: #ff5800; } /* Orange */
 .c-F { background-color: #0046ad; } /* Blue */
@@ -65,27 +50,86 @@ p {
 .c-B { background-color: #009b48; } /* Green */
 .c-D { background-color: #ffd500; } /* Yellow */
 
-#canvas-container {
-    width: 100%;
-    max-width: 500px;
-    height: 400px;
-    background: #111113;
-    border-radius: 12px;
+/* Face Window & CSS Sliding Animation Canvas */
+.face-window {
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 16px;
+    width: 280px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.face-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #aaa;
+}
+
+.face-container {
+    width: 240px;
+    height: 240px;
+    margin: 0 auto;
+    perspective: 1000px;
+}
+
+.grid-3x3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 6px;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    padding: 6px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+/* Slide Transition Classes triggered by JS */
+.grid-3x3.slide-out {
+    transform: translateX(-100%) rotateY(-30deg);
+    opacity: 0;
+}
+
+.grid-3x3.slide-in {
+    transform: translateX(100%) rotateY(30deg);
+    opacity: 0;
+}
+
+.sticker {
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+/* Locked indicators for center squares */
+.sticker.center-lock {
+    cursor: not-allowed;
     position: relative;
-    cursor: grab;
 }
 
-#canvas-container:active { 
-    cursor: grabbing; 
+.sticker.center-lock::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 50%;
 }
 
+/* Controls UI Placement */
 .controls {
     display: flex;
     gap: 12px;
-    margin-top: 15px;
-    width: 100%;
-    max-width: 500px;
+    margin-top: 25px;
+    width: 320px;
 }
 
 button {
@@ -98,57 +142,33 @@ button {
     font-weight: 600;
     border-radius: 8px;
     cursor: pointer;
-    transition: opacity 0.2s;
 }
 
-button:hover { 
-    opacity: 0.9; 
-}
+button:hover { opacity: 0.9; }
+button.secondary { background-color: #222225; color: #fff; border: 1px solid var(--border-color); }
+button.secondary:hover { background-color: #2a2a2f; }
+button:disabled { background-color: #111; color: #444; cursor: not-allowed; border: none; }
 
-button.secondary { 
-    background-color: #222225; 
-    color: #fff; 
-    border: 1px solid var(--border-color); 
-}
-
-button.secondary:hover { 
-    background-color: #2a2a2f; 
-}
-
-button:disabled { 
-    background-color: #111; 
-    color: #444; 
-    cursor: not-allowed; 
-    border: none; 
-}
-
+/* Solutions Window Layout */
 .player-panel {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 15px;
-    margin-top: 15px;
-    max-width: 500px;
-    width: 100%;
+    margin-top: 20px;
+    width: 320px;
     box-sizing: border-box;
     display: none;
     text-align: center;
 }
 
 .move-display {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: bold;
     color: #00dfa2;
-    margin: 10px 0;
+    margin: 8px 0;
     font-family: monospace;
 }
 
-.status-text { 
-    font-size: 0.9rem; 
-    color: #888; 
-}
-
-.player-buttons {
-    display: flex;
-    gap: 10px;
-}
+.status-text { font-size: 0.85rem; color: #888; }
+.player-buttons { display: flex; gap: 10px; margin-top: 10px; }
